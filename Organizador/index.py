@@ -58,4 +58,10 @@ def organizar_pasta(caminho_pasta):
 if __name__ == "__main__":
     print("=== ORGANIZADOR AUTOMÁTICO DE ARQUIVOS ===")
     
+    # Você pode digitar o caminho manual ou dar Enter para organizar a pasta atual
+    caminho = input("Digite o caminho da pasta (ou pressione Enter para usar a pasta atual): ").strip()
     
+    if not caminho:
+        caminho = "."
+
+    organizar_pasta(caminho)
