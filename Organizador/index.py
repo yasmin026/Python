@@ -36,3 +36,26 @@ def organizar_pasta(caminho_pasta):
             if extensao in extensoes:
                 pasta_destino_nome = categoria
                 break
+            
+            
+    # Cria a pasta de destino se ela ainda não existir
+        pasta_destino = pasta_target / pasta_destino_nome
+        pasta_destino.mkdir(exist_ok=True)
+
+        # Move o arquivo para a nova pasta
+        caminho_destino_arquivo = pasta_destino / item.name
+        
+        # Evita sobrescrever arquivos com o mesmo nome
+        if not caminho_destino_arquivo.exists():
+            shutil.move(str(item), str(caminho_destino_arquivo))
+            print(f"➜ Movido: {item.name} ➔ [{pasta_destino_nome}]")
+            arquivos_movidos += 1
+        else:
+            print(f"⚠️ Ignorado (já existe na pasta de destino): {item.name}")
+
+    print(f"\n✨ Concluído! Total de {arquivos_movidos} arquivos organizados.")
+
+if __name__ == "__main__":
+    print("=== ORGANIZADOR AUTOMÁTICO DE ARQUIVOS ===")
+    
+    
