@@ -1,6 +1,7 @@
 from datetime import datetime
 from bs4 import BeautifulSoup
 import requests
+import re
 
 
 def verificar_preco_produto(url, seletor_css, preco_desejado):
@@ -32,24 +33,31 @@ def verificar_preco_produto(url, seletor_css, preco_desejado):
 
     if not elemento_preco:
       print('❌ Não foi possível encontrar o elemento do preço na página.')
+      return None
+
+    texto_extraido = elemento_preco.get_text().strip()
+    print(f'📄 Texto bruto encontrado no HTML: "{texto_extraido}"')
+
+    # Expressão regular para extrair apenas números, pontos e vírgulas de preço
+    # (Ex: procura por padrões como 1.999,00 ou 199.90)
+    match_preco = re.search(r'[\d.,]+', texto_extraido.replace('R$', ''))
+
+    if not match_preco:
       print(
-          'Dica: Os sites costumam mudar as classes HTML com frequência ou'
-          ' exigir JavaScript.'
+          '❌ O elemento encontrado não contém um formato numérico de preço'
+          ' válido.'
       )
       return None
 
-    # Limpeza da string de preço (ex: "R$ 1.999,00" -> 1999.00)
     preco_texto = (
-        elemento_preco.get_text()
-        .replace('R$', '')
-        .replace('$', '')
+        match_preco.group(0)
         .replace('.', '')
         .replace(',', '.')
         .strip()
     )
 
     preco_atual = float(preco_texto)
-    print(f'💵 Preço atual encontrado: R$ {preco_atual:.2f}')
+    print(f'💵 Preço atual convertido: R$ {preco_atual:.2f}')
 
     # Verificação de Alerta
     if preco_atual <= preco_desejado:
@@ -76,9 +84,7 @@ def verificar_preco_produto(url, seletor_css, preco_desejado):
 
 def enviar_alerta_telegram(mensagem):
   """Função responsável por enviar a mensagem de alerta para o teu Telegram."""
-  # Substituir pelo teu Token do Bot (criado através do @BotFather no Telegram)
   TOKEN = 'SEU_BOT_TOKEN_AQUI'
-  # Substituir pelo teu Chat ID (obtido através do @userinfobot)
   CHAT_ID = 'SEU_CHAT_ID_AQUI'
 
   url_api = f'https://api.telegram.org/bot{TOKEN}/sendMessage'
@@ -99,9 +105,11 @@ if __name__ == '__main__':
   print('🤖 WEB SCRAPER MONITOR DE PREÇOS COM TELEGRAM')
   print('====================================================\n')
 
-  # Exemplo de parâmetros (podes substituir por um link real de e-commerce)
-  URL_EXEMPLO = 'https://httpbin.org/html'  # URL de teste para começar
-  SELETOR_CSS_EXEMPLO = 'h1'  # Seletor de exemplo
+  # Para testar sem erros de texto, podes usar um site real de testes de scraping
+  # ou um link onde o seletor aponte para um valor numérico.
+  URL_EXEMPLO = 'https://httpbin.org/html'
+  # Vamos usar uma tag de teste ou podes colocar o link e seletor da tua loja favorita
+  SELETOR_CSS_EXEMPLO = 'h1'
   MEU_PRECO_ALVO = 100.00
 
   verificar_preco_produto(URL_EXEMPLO, SELETOR_CSS_EXEMPLO, MEU_PRECO_ALVO)
